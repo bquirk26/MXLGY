@@ -23,7 +23,7 @@ Relations
 
 ## Our Data
 - We have taken our data from [TheCocktailDB](https://www.thecocktaildb.com/)'s API
-- 
+
 
 ## Implementation Plan
 
@@ -31,4 +31,5 @@ Relations
 - For the frontend, we are planning on using modern web frameworks and libraries such as React and TailwindCSS.
 
 ### Backend
+- For our backend, we plan to use Docker to deploy, and the Fiber library with Go's SQL driver for our API.
 
