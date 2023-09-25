@@ -22,14 +22,13 @@ Relations
 ![er model](ERmodel.png)
 
 ## Our Data
-- We have taken our data from [TheCocktailDB](https://www.thecocktaildb.com/)'s API
-
+- We have taken our data from [TheCocktailDB](https://www.thecocktaildb.com/)'s freely available API
 
 ## Implementation Plan
 
 ### Frontend
-- For the frontend, we are planning on using modern web frameworks and libraries such as React and TailwindCSS.
+- For the frontend, we are planning on using modern web frameworks such as Next.js, React, the Fetch API, and TailwindCSS.
 
 ### Backend
 - For our backend, we plan to use Docker to deploy, and the Fiber library with Go's SQL driver for our API.
-
+- We intend to use Docker Compose to orchestrate networking between the Go server and PostgreSQL.
