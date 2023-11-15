@@ -65,7 +65,6 @@ CREATE TABLE contains (
 --  get all ingredients
 --  create ingredient, user, recipe
 
--- simple relation
 
 -- all recipes a user saved
 SELECT RecipeName 
@@ -81,21 +80,6 @@ SELECT IngredientName
 FROM users, owns, ingredients 
 WHERE owns.Email = users.Email and saved.IngredientName = ingredients.IngredientName and user.Email = ${var}
 
--- all drinks for which an ingredient may be used
-
-
--- adding
-
--- let user mark ingredient as owned
--- add recipe to user's liked
-
-
-
--- complex
-
--- all recipes a user can make (given ingredients)
--- ordering of ingredients/combinations of ingredients based on how many recipes they complete
--- and which recipes they do complete.
 
 
 ```
