@@ -54,7 +54,29 @@ function getAllOwnedIngredients(userEmail) {
 function getIngredientsInRecipe(recipe) {
     return db.any("SELECT contains.ingredientname, contains.amount FROM contains WHERE contains.recipename = $1", [recipe]);
 }
+
+//user saves recipe
+function saveRecipe(email, recipe) {
+    //check if exists?
+    return db.any(`INSERT INTO saved (email, recipename) VALUES ($1, $2)`, [email, recipe]);
+}
+
+//unsave recipe
+function unsaveRecipe(email, recipe) {
+    return db.any(`DELETE FROM saved WHERE email = $1 AND recipename = $2`, [email, recipe]);
+}
  
+//user marks ingredient as owned
+
+function ownIngredient(email, ingredient) {
+    return db.any('INSERT INTO owns (email, ingredientname) VALUES ($1, $2)', [email, ingredient]);
+}
+
+function disownIngredient(email, ingredient) {
+    return db.any('DELETE FROM owns WHERE email = $1 AND ingredientname = $2', [email, ingredient]);
+}
+
+
 /** 
 getAllOwnedIngredients("test@icloud.com").then((data) => {
     console.log("res: ");
@@ -74,5 +96,9 @@ module.exports = {
     getAllSavedRecipes,
     getAllRecipes,
     getAllIngredients,
-    getIngredientsInRecipe
+    getIngredientsInRecipe,
+    saveRecipe,
+    unsaveRecipe,
+    ownIngredient,
+    disownIngredient
 }
