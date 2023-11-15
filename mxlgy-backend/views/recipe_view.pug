@@ -1,0 +1,19 @@
+extends layout 
+
+block content 
+    h1=title 
+
+    h3 Description
+    p #{recipe[0].description}
+    h3 Instructions 
+    p #{recipe[0].instructions}
+    h3 Ingredients 
+    table.table-sm
+        thead 
+            tr 
+                th Ingredient
+                th Amount
+        each ingredient in ingredients
+            tr 
+                td #{ingredient.ingredientname}
+                td #{ingredient.amount} #{ingredient.unit}

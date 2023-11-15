@@ -1,0 +1,25 @@
+extends layout 
+
+block content 
+    h1=title 
+
+    h3 ingredients owned
+    table.table-sm
+        thead 
+            tr 
+                th Ingredient
+                th amount
+        each ingredient in ingredients
+            tr 
+                td #{ingredient.ingredientname}
+                td #{ingredient.amount} #{ingredient.unit}
+
+    h3 recipes saved
+    table.table-sm
+        thead 
+            tr 
+                th recipe
+        each recipe in recipes
+            tr 
+                td #{recipe.recipename}
+                

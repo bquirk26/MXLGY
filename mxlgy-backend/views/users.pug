@@ -1,0 +1,14 @@
+extends layout 
+block content 
+    h1=title
+    table.table-sm
+        thead 
+            tr 
+                th name 
+                th email
+        each user in data
+            tr 
+                td 
+                    a(href=`/users/${user.name}`) #{user.name}
+                td #{user.email}
+    

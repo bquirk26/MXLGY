@@ -1,0 +1,8 @@
+extends layout 
+block content 
+    h1=title
+    ul 
+    each row in data 
+        li 
+            a(href=`/recipes/${row.recipename}`) #{row.recipename}
+    
