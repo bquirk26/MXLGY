@@ -41,6 +41,10 @@ router.get('/api/:name', function(req, res, next) {
 
 //user register => POST / INSERT INTO
 
+router.post('/api/create_account', function(req, res, next) {
+
+});
+
 
 module.exports = router;
 

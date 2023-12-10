@@ -87,7 +87,7 @@ getAllOwnedIngredients("test@icloud.com").then((data) => {
 */
 //all ingredients a recipe contains
 
-
+db.any('SELECT name from users').then(data => console.log(data));
 
 module.exports = {
     pgp,
