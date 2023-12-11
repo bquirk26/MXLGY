@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const {pgp, db, getAllOwnedIngredients, getAllSavedRecipes, getAllIngredients} = require('../db');
+const {pgp, db, getAllOwnedIngredients, getAllSavedRecipes, getAllIngredients, create_user} = require('../db');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -23,7 +23,6 @@ router.get('/:name', function(req, res, next) {
             console.log(error);
         })
     })
-
 })
 
 router.get('/api/:name', function(req, res, next) {
@@ -41,8 +40,28 @@ router.get('/api/:name', function(req, res, next) {
 
 //user register => POST / INSERT INTO
 
-router.post('/api/create_account', function(req, res, next) {
+router.post('/signup', function(req, res, next) {
+    //validation
+    /**
+     * What should the form contain? 
+     * name, email, password? -- probably not;
+     * 
+     */
+    const id = req.query.id;
+    if (id === null) {
+        res.sendStatus(400);
+        return;
+    }
+    create_user(id).then(res.sendStatus(201)).catch(res.sendStatus(400));
+});
 
+router.get('/exists', function(req, res, next) {
+    const id = req.query.id;
+    if (id == null) {
+        res.sendStatus(400);
+        return;
+    }
+    create_user(id).then(res.sendStatus(200)).catch(res.sendStatus(400));
 });
 
 
