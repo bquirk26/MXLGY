@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const {pgp, db, getAllRecipes, saveRecipe, getAllSavedRecipes, unsaveRecipe, getIngredientsInRecipe} = require('../db');
+const {pgp, db, getAllRecipes, saveRecipe, getAllSavedRecipes, unsaveRecipe, getIngredientsInRecipe, orderByCloseness} = require('../db');
 
 /** 
 router.get('/', function(req, res, next) {
@@ -30,6 +30,13 @@ router.get('/get_all_recipes', function(req, res, next) {
             })).catch((error) => res.render("error", {error: error}));
 });
 
+router.get('/byCloseness', function(req, res, next) {
+    const uid = req.query.userid;
+    orderByCloseness(uid).then(data => {
+        res.json({recipes: data});
+    }).catch(error => res.json({error: error}));
+})
+
 
 
 
@@ -53,13 +60,13 @@ router.get('/:recipe', function(req, res, next) {
 //mark saved
 router.post('/:recipe/save', function(req, res, next) {
     const userid = req.query.userid;
-    saveRecipe(userid, req.params.recipe).catch((error) => res.json({error: error}));
+    saveRecipe(userid, req.params.recipe);
 });
 
 //unsave
 router.post('/:recipe/unsave', function(req, res, next) {
     const userid = req.query.userid;
-    unsaveRecipe(userid, req.params.recipe).catch((error) => res.json({error: error}));
+    unsaveRecipe(userid, req.params.recipe);
 })
 
 module.exports = router;

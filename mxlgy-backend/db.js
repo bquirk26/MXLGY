@@ -1,5 +1,6 @@
 const pgp = require('pg-promise')();
-const connect = 'postgresql://localhost/mxlgy'
+const connect = 'postgresql://localhost/beckettquirk'
+const db = pgp(connect);
 db.connect().then(obj => {
     console.log(obj.client.serverVersion);
     obj.done();
@@ -20,17 +21,17 @@ db.any('SELECT * from ingredients')
 //get all recipes, ingredients.users
 
 function getAllRecipes(userid) {
-    const data =  db.any("SELECT recipes.*, CASE WHEN saved.userid IS NULL THEN FALSE ELSE TRUE END AS isSaved " +
+    const data =  db.any("SELECT recipes.*, CASE WHEN saved.userid IS NULL THEN FALSE ELSE TRUE END AS Saved " +
     "FROM recipes " + 
     "LEFT JOIN saved ON saved.recipename = recipes.recipename AND saved.userid = $1 " + 
-    "ORDER BY recipename ASC", [userid]);
+    "ORDER BY saved DESC, recipename ASC", [userid]);
     return data;
 }
 
 function getAllIngredients(userid) {
-    const data =  db.any("SELECT ingredients.*, CASE WHEN owns.userid IS NULL THEN FALSE ELSE TRUE END AS isSaved " +
+    const data =  db.any("SELECT ingredients.*, CASE WHEN owns.userid IS NULL THEN FALSE ELSE TRUE END AS Owned " +
     "FROM ingredients " + 
-    "LEFT JOIN saved ON owns.ingredientname = ingredients.ingredientname AND saved.userid = $1 " +
+    "LEFT JOIN owns ON owns.ingredientname = ingredients.ingredientname AND owns.userid = $1 " +
     "ORDER BY ingredientname ASC", [userid]);
     return data;
 }
@@ -41,23 +42,28 @@ function getAllIngredients(userid) {
 function ingredientsByPrice(userid) {
     const data =  db.any("SELECT ingredients.*, CASE WHEN owns.userid IS NULL THEN FALSE ELSE TRUE END AS isSaved " +
     "FROM ingredients " + 
-    "LEFT JOIN saved ON owns.ingredientname = ingredients.ingredientname AND saved.userid = $1 " +
+    "LEFT JOIN owns ON owns.ingredientname = ingredients.ingredientname AND owns.userid = $1 " +
     "ORDER BY Price ASC", [userid]);
     return data;
 }
 
 function recipesByCost(userid) {
-    
+
 }
 
 
 //by closeness to completion: 
 function orderByCloseness(userid) {
-    const data = db.any("SELECT contains.recipeName, Count (contains.ingredientName) AS ingredientsMissing " + 
-    "FROM contains " + 
-    "WHERE contains.ingredientName NOT IN (SELECT ingredientName from owns WHERE userid = $1) " + 
-    "GROUP BY contains.recipeName " + 
-    "ORDER BY Count (contains.ingredientName) ASC", [userid]);
+    const data = db.any("WITH temp AS ( " +
+        "SELECT contains.recipename, Count (contains.ingredientName) AS missing " + 
+        "FROM contains " +
+        "WHERE contains.ingredientName NOT IN (SELECT ingredientName from owns WHERE userid = $1) " +
+        "GROUP BY contains.recipeName " +
+        "ORDER BY Count (contains.ingredientName) ASC) " +
+        "SELECT temp.recipename, recipes.*, temp.missing " +
+        "FROM temp " +
+        "INNER JOIN recipes ON recipes.recipename = temp.recipename " +
+        "ORDER BY temp.missing", [userid]);
     return data;
 }
 
@@ -168,5 +174,6 @@ module.exports = {
     unsaveRecipe,
     ownIngredient,
     disownIngredient,
-    create_user
+    create_user,
+    orderByCloseness
 }
