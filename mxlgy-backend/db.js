@@ -1,6 +1,5 @@
 const pgp = require('pg-promise')();
 const connect = 'postgresql://localhost/mxlgy'
-const db = pgp(connect);
 db.connect().then(obj => {
     console.log(obj.client.serverVersion);
     obj.done();
@@ -20,34 +19,63 @@ db.any('SELECT * from ingredients')
 
 //get all recipes, ingredients.users
 
-function getAllRecipes() {
-    const data =  db.any('SELECT * FROM recipes');
+function getAllRecipes(userid) {
+    const data =  db.any("SELECT recipes.*, CASE WHEN saved.userid IS NULL THEN FALSE ELSE TRUE END AS isSaved " +
+    "FROM recipes " + 
+    "LEFT JOIN saved ON saved.recipename = recipes.recipename AND saved.userid = $1 " + 
+    "ORDER BY recipename ASC", [userid]);
     return data;
 }
 
-function getAllIngredients() {
-    const data =  db.any('SELECT * FROM ingredients');
+function getAllIngredients(userid) {
+    const data =  db.any("SELECT ingredients.*, CASE WHEN owns.userid IS NULL THEN FALSE ELSE TRUE END AS isSaved " +
+    "FROM ingredients " + 
+    "LEFT JOIN saved ON owns.ingredientname = ingredients.ingredientname AND saved.userid = $1 " +
+    "ORDER BY ingredientname ASC", [userid]);
     return data;
 }
 
+// orderings
+
+// by price/ total cost
+function ingredientsByPrice(userid) {
+    const data =  db.any("SELECT ingredients.*, CASE WHEN owns.userid IS NULL THEN FALSE ELSE TRUE END AS isSaved " +
+    "FROM ingredients " + 
+    "LEFT JOIN saved ON owns.ingredientname = ingredients.ingredientname AND saved.userid = $1 " +
+    "ORDER BY Price ASC", [userid]);
+    return data;
+}
+
+function recipesByCost(userid) {
     
+}
 
+
+//by closeness to completion: 
+function orderByCloseness(userid) {
+    const data = db.any("SELECT contains.recipeName, Count (contains.ingredientName) AS ingredientsMissing " + 
+    "FROM contains " + 
+    "WHERE contains.ingredientName NOT IN (SELECT ingredientName from owns WHERE userid = $1) " + 
+    "GROUP BY contains.recipeName " + 
+    "ORDER BY Count (contains.ingredientName) ASC", [userid]);
+    return data;
+}
 
 //get user's recipes, ingredients
 
-async function getAllSavedRecipes(userEmail) {
+async function getAllSavedRecipes(userid) {
     const data = await db.any("SELECT recipes.* " + 
     "FROM users, saved, recipes " +
-    "WHERE saved.Email = users.Email AND users.Email = $1 AND recipes.RecipeName = saved.RecipeName ", 
-    [userEmail]);
+    "WHERE saved.userid = users.userid AND users.userid = $1 AND recipes.RecipeName = saved.RecipeName ", 
+    [userid]);
     return data;
 }
 
-function getAllOwnedIngredients(userEmail) {
+function getAllOwnedIngredients(userid) {
     const data = db.any("SELECT ingredients.*, owns.amount " + 
     "FROM users, owns, ingredients " +
-    "WHERE owns.Email = users.Email and owns.IngredientName = ingredients.IngredientName and users.Email = $1", 
-    [userEmail]);
+    "WHERE owns.userid = users.userid and owns.IngredientName = ingredients.IngredientName and users.userid = $1", 
+    [userid]);
     return data;
 }
 
@@ -56,25 +84,64 @@ function getIngredientsInRecipe(recipe) {
 }
 
 //user saves recipe
-function saveRecipe(email, recipe) {
+function saveRecipe(userid, recipe) {
     //check if exists?
-    return db.any(`INSERT INTO saved (email, recipename) VALUES ($1, $2)`, [email, recipe]);
+    db.any("SELECT userid FROM saved WHERE userid = $1 AND recipename = $2", 
+                [userid, recipe]).then((data) => {
+                    if (data.length > 0) {
+                        return;
+                    } else {
+                        return db.any(`INSERT INTO saved (userid, recipename) VALUES ($1, $2)`, [userid, recipe]);
+                    }
+                })
+
+
 }
 
 //unsave recipe
-function unsaveRecipe(email, recipe) {
-    return db.any(`DELETE FROM saved WHERE email = $1 AND recipename = $2`, [email, recipe]);
+function unsaveRecipe(userid, recipe) {
+    db.any("SELECT userid FROM saved WHERE userid = $1 AND recipename = $2", 
+    [userid, recipe]).then((data) => {
+        if (data.length == 0) {
+            return; 
+        } else {
+            return db.any(`DELETE FROM saved WHERE userid = $1 AND recipename = $2`, [userid, recipe]);
+        }
+    });
+   
 }
  
 //user marks ingredient as owned
 
-function ownIngredient(email, ingredient) {
-    return db.any('INSERT INTO owns (email, ingredientname) VALUES ($1, $2)', [email, ingredient]);
+function ownIngredient(userid, ingredient) {
+    db.any("SELECT userid FROM owns WHERE userid = $1 AND ingredientname = $2", 
+    [userid, ingredient]).then((data => {
+        if (data.length > 0) {
+            return;
+        } else {
+            return db.any('INSERT INTO owns (userid, ingredientname) VALUES ($1, $2)', [userid, ingredient]);
+        }
+    }));
 }
 
-function disownIngredient(email, ingredient) {
-    return db.any('DELETE FROM owns WHERE email = $1 AND ingredientname = $2', [email, ingredient]);
+function disownIngredient(userid, ingredient) {
+    db.any("SELECT userid FROM owns WHERE userid = $1 AND ingredientname = $2", 
+    [userid, ingredient]).then((data => {
+        if (data.length == 0) {
+            return;
+        } else {
+            return db.any('DELETE FROM owns WHERE userid = $1 AND ingredientname = $2', [userid, ingredient]);
+        }
+    }))
 }
+
+
+// create user
+
+function create_user(uid) {
+    return db.any('INSERT INTO users (userid) VALUES ($1)', [uid]);
+}
+
 
 
 /** 
@@ -87,6 +154,8 @@ getAllOwnedIngredients("test@icloud.com").then((data) => {
 */
 //all ingredients a recipe contains
 
+//db.any('SELECT name from users').then(data => console.log(data));
+
 module.exports = {
     pgp,
     db,
@@ -98,5 +167,6 @@ module.exports = {
     saveRecipe,
     unsaveRecipe,
     ownIngredient,
-    disownIngredient
+    disownIngredient,
+    create_user
 }
