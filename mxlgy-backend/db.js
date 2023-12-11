@@ -1,5 +1,5 @@
 const pgp = require('pg-promise')();
-const connect = 'postgresql://localhost/beckettquirk'
+const connect = 'postgresql://localhost/mxlgy'
 const db = pgp(connect);
 db.connect().then(obj => {
     console.log(obj.client.serverVersion);
@@ -86,8 +86,6 @@ getAllOwnedIngredients("test@icloud.com").then((data) => {
 });
 */
 //all ingredients a recipe contains
-
-db.any('SELECT name from users').then(data => console.log(data));
 
 module.exports = {
     pgp,

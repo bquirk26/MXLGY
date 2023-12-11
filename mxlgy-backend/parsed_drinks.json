@@ -1811,40 +1811,6 @@
             "instructions": "Mix syrup and milk in a fountain glass. Add soda water, serve with a straw."
         },
         {
-            "id": 95,
-            "name": "Egg Nog #4",
-            "category": "Punch / Party Drink",
-            "image": "https://www.thecocktaildb.com/images/media/drink/wpspsy1468875747.jpg",
-            "glass": "Punch bowl",
-            "ingredients": [
-                "Egg Yolk",
-                "Sugar",
-                "Milk",
-                "Light Rum",
-                "Bourbon",
-                "Vanilla Extract",
-                "Salt",
-                "Whipping Cream",
-                "Egg White",
-                "Sugar",
-                "Nutmeg"
-            ],
-            "measurements": [
-                "6",
-                "1/4 cup",
-                "2 cups",
-                "1/2 cup",
-                "1/2 cup",
-                "1 tsp",
-                "1/4 tsp",
-                "1 cup",
-                "6",
-                "1/4 cup",
-                "ground"
-            ],
-            "instructions": "In a small mixer bowl beat egg yolks till blended. Gradually add 1/4 cup sugar, beating at high speed till thick and lemon colored. Stir in milk, stir in rum, bourbon, vanilla, and salt. Chill thoroughly. Whip cream. Wash beaters well. In a large mixer bowl beat egg whites till soft peaks form. Gradually add remaining 1/4 cup sugar, beating to stiff peaks. Fold yolk mixture and whipped cream into egg whites. Serve immediately. Sprinkle nutmeg over each serving. Serve in a punch bowl or another big bowl. NOTE: For a nonalcoholic eggnog, prepare Eggnog as above, except omit the bourbon and rum and increase the milk to 3 cups."
-        },
-        {
             "id": 96,
             "name": "English Highball",
             "category": "Ordinary Drink",
@@ -3163,23 +3129,6 @@
                 "1 tsp"
             ],
             "instructions": "In a shaker half-filled with ice cubes, combine all of the ingredients. Shake well. Strain into a cocktail glass."
-        },
-        {
-            "id": 162,
-            "name": "Holloween Punch",
-            "category": "Punch / Party Drink",
-            "image": "https://www.thecocktaildb.com/images/media/drink/lfeoe41504888925.jpg",
-            "glass": "Punch bowl",
-            "ingredients": [
-                "Grape Juice",
-                "Carbonated Soft Drink",
-                "Sherbet",
-                "Sherbet"
-            ],
-            "measurements": [
-                ", orange"
-            ],
-            "instructions": "Take a bunch of grape juice and a bunch of fizzy stuff (club soda, ginger ale, lemonlime, whatever). Mix them in a punch bowl. Take orange sherbet and lime sherbet. Scoop out scoops and float them in the punch, let them melt a little so that a nasty film spreads all over the top of the punch but there are still \"bubbles\" in it in the form of sherbet scoops. Looks horrible, tastes just fine."
         },
         {
             "id": 163,
