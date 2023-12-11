@@ -1,18 +1,19 @@
 
 # Relational Schema
 
+
+## Entities
 ```sql
 CREATE TABLE users (
-	Email VARCHAR(100) PRIMARY KEY,
-	Name VARCHAR(40),
-	Password VARCHAR(30) NOT NULL
+	userid VARCHAR(200) PRIMARY KEY
 );
 
 CREATE TABLE ingredients (
 	IngredientName VARCHAR(100) PRIMARY KEY,
 	Description VARCHAR(7500),
 	Type VARCHAR(100),
-	ABV REAL
+	ABV REAL,
+	price REAL
 );
 
 CREATE TABLE recipes (
@@ -22,26 +23,27 @@ CREATE TABLE recipes (
 	Glass VARCHAR(100),
 	Instructions VARCHAR(10000)
 );
+--view for recipes + total cost?
 ```
 
 
 ### relations 
 ```sql
 CREATE TABLE owns (
-	Email VARCHAR(100),
+	userid VARCHAR(200),
 	IngredientName VARCHAR(100),
 	Amount VARCHAR(200),
-	PRIMARY KEY (Email, IngredientName), 
-	FOREIGN KEY (Email) REFERENCES users(Email),
+	PRIMARY KEY (userid, IngredientName), 
+	FOREIGN KEY (userid) REFERENCES users(userid),
 	FOREIGN KEY (IngredientName) REFERENCES ingredients(IngredientName)
 );
 
 CREATE TABLE saved (
-	Email VARCHAR(100),
+	userid VARCHAR(200),
 	RecipeName VARCHAR(100),
 	OnDate TIMESTAMP,
-	PRIMARY KEY (Email, RecipeName),
-	FOREIGN KEY (Email) REFERENCES users(Email),
+	PRIMARY KEY (userid, RecipeName),
+	FOREIGN KEY (userid) REFERENCES users(userid),
 	FOREIGN KEY (RecipeName) REFERENCES recipes(RecipeName)
 );
 	
@@ -53,33 +55,38 @@ CREATE TABLE contains (
 	FOREIGN KEY (RecipeName) REFERENCES recipes(RecipeName),
 	FOREIGN KEY (IngredientName) REFERENCES ingredients(IngredientName)
 );
+
 ```
 
 ### Queries
 
 ```sql
---all
+-- get all recipes and mark whether a given user has saved them
+SELECT recipes.recipename, CASE WHEN saved.email IS NULL THEN FALSE ELSE TRUE END AS isSaved
+FROM recipes
+LEFT JOIN saved ON saved.recipename = recipes.recipename AND saved.email = 'test@icloud.com'
 
---  get all users
---  get all recipes
---  get all ingredients
---  create ingredient, user, recipe
+-- get all ingredients and mark whether a given user owns them
+SELECT ingredients.ingredientname, CASE WHEN owns.email IS NULL THEN FALSE ELSE TRUE END AS isOwned
+FROM ingredients
+LEFT JOIN owns ON owns.ingredientname = ingredients.ingredientname AND owns.email = 'test@icloud.com';
 
+-- all recipes a user can make given the ingredients they own
 
--- all recipes a user saved
-SELECT RecipeName 
-FROM users, saved, recipes 
-WHERE saved.Email = users.Email and saved.RecipeName = recipes.RecipeName and user.Email = ${var}
--- all ingredients a user owns
-SELECT IngredientName 
-FROM users, owns, ingredients 
-WHERE owns.Email = users.Email and saved.IngredientName = ingredients.IngredientName and user.Email = ${var}
+SELECT C1.recipeName, Count (ingredientName)
+FROM contains as C1
+GROUP BY recipeName
+HAVING Count (C1.ingredientName) = (SELECT Count (C2.ingredientName) 
+								FROM contains as C2
+								INNER JOIN owns ON owns.ingredientName = C2.ingredientName
+								WHERE userid = 'test@icloud.com' AND C1.recipeName = C2.recipeName
+								GROUP BY C2.recipeName);
 
--- all ingredients a recipe contains
-SELECT IngredientName 
-FROM users, owns, ingredients 
-WHERE owns.Email = users.Email and saved.IngredientName = ingredients.IngredientName and user.Email = ${var}
-
-
+-- recipes ordered by how many of their ingredients a user is missing
+SELECT contains.recipeName, Count (contains.ingredientName)
+FROM contains
+WHERE contains.ingredientName NOT IN (SELECT ingredientName from owns WHERE email = 'test@icloud.com')
+GROUP BY contains.recipeName
+ORDER BY Count (contains.ingredientName) ASC;
 
 ```
