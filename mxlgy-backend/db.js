@@ -20,26 +20,46 @@ db.any('SELECT * from ingredients')
 
 //get all recipes, ingredients.users
 
-function getAllRecipes(userid) {
-    const data =  db.any("SELECT recipes.*, CASE WHEN saved.userid IS NULL THEN FALSE ELSE TRUE END AS Saved " +
-    "FROM recipes " + 
-    "LEFT JOIN saved ON saved.recipename = recipes.recipename AND saved.userid = $1 " + 
-    "ORDER BY saved DESC, recipename ASC", [userid]);
+function getAllRecipes(userid, savedOnly) {
+    let data;
+    if (savedOnly === 'true') {
+        data = db.any("WITH temp AS (SELECT recipes.*, CASE WHEN saved.userid IS NULL THEN FALSE ELSE TRUE END AS Saved " +
+        "FROM recipes " + 
+        "LEFT JOIN saved ON saved.recipename = recipes.recipename AND saved.userid = $1 " + 
+        "ORDER BY saved DESC, recipename ASC) " +
+        "SELECT * FROM temp WHERE Saved = TRUE", [userid]);
+    } else {
+        data =  db.any("SELECT recipes.*, CASE WHEN saved.userid IS NULL THEN FALSE ELSE TRUE END AS Saved " +
+        "FROM recipes " + 
+        "LEFT JOIN saved ON saved.recipename = recipes.recipename AND saved.userid = $1 " + 
+        "ORDER BY saved DESC, recipename ASC", [userid]);
+    }
+
     return data;
 }
 
-function getAllIngredients(userid) {
-    const data =  db.any("SELECT ingredients.*, CASE WHEN owns.userid IS NULL THEN FALSE ELSE TRUE END AS Owned " +
-    "FROM ingredients " + 
-    "LEFT JOIN owns ON owns.ingredientname = ingredients.ingredientname AND owns.userid = $1 " +
-    "ORDER BY ingredientname ASC", [userid]);
+function getAllIngredients(userid, ownedOnly) {
+    let data;
+    if (ownedOnly === 'true') {
+        data = db.any("WITH temp AS (SELECT ingredients.*, CASE WHEN owns.userid IS NULL THEN FALSE ELSE TRUE END AS Owned " +
+        "FROM ingredients " + 
+        "LEFT JOIN owns ON owns.ingredientname = ingredients.ingredientname AND owns.userid = $1 " +
+        "ORDER BY ingredientname ASC) " +
+        "SELECT * FROM TEMP WHERE Owned = true", [userid]);
+    } else {
+        data =  db.any("SELECT ingredients.*, CASE WHEN owns.userid IS NULL THEN FALSE ELSE TRUE END AS Owned " +
+        "FROM ingredients " + 
+        "LEFT JOIN owns ON owns.ingredientname = ingredients.ingredientname AND owns.userid = $1 " +
+        "ORDER BY ingredientname ASC", [userid]);
+    }
+
     return data;
 }
 
 // orderings
 
 // by price/ total cost
-function ingredientsByPrice(userid) {
+function ingredientsByPrice(userid, ownedOnly) {
     const data =  db.any("SELECT ingredients.*, CASE WHEN owns.userid IS NULL THEN FALSE ELSE TRUE END AS isSaved " +
     "FROM ingredients " + 
     "LEFT JOIN owns ON owns.ingredientname = ingredients.ingredientname AND owns.userid = $1 " +
@@ -53,8 +73,22 @@ function recipesByCost(userid) {
 
 
 //by closeness to completion: 
-function orderByCloseness(userid) {
-    const data = db.any("WITH temp AS ( " +
+function orderByCloseness(userid, savedOnly) {
+    let data;
+    if (savedOnly === 'true') {
+        data = db.any("WITH temp AS ( " +
+        "SELECT contains.recipename, Count (contains.ingredientName) AS missing " + 
+        "FROM contains " +
+        "WHERE contains.ingredientName NOT IN (SELECT ingredientName from owns WHERE userid = $1) " +
+        "GROUP BY contains.recipeName " +
+        "ORDER BY Count (contains.ingredientName) ASC) " +
+        "SELECT temp.recipename, recipes.*, temp.missing " +
+        "FROM temp " +
+        "INNER JOIN recipes ON recipes.recipename = temp.recipename " +
+        "WHERE temp.recipename in (SELECT recipename from saved WHERE userid = $1) " +
+        "ORDER BY temp.missing", [userid]);
+    } else {
+        data = db.any("WITH temp AS ( " +
         "SELECT contains.recipename, Count (contains.ingredientName) AS missing " + 
         "FROM contains " +
         "WHERE contains.ingredientName NOT IN (SELECT ingredientName from owns WHERE userid = $1) " +
@@ -64,6 +98,7 @@ function orderByCloseness(userid) {
         "FROM temp " +
         "INNER JOIN recipes ON recipes.recipename = temp.recipename " +
         "ORDER BY temp.missing", [userid]);
+    }
     return data;
 }
 

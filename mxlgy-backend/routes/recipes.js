@@ -25,14 +25,15 @@ router.get('/:recipename', function(req, res, next) {
 
 router.get('/get_all_recipes', function(req, res, next) {
             const uid = req.query.userid;
-            getAllRecipes(uid).then((data => {
+            const savedOnly = req.query.savedOnly;
+            getAllRecipes(uid, savedOnly).then((data => {
                 res.json({recipes: data});
             })).catch((error) => res.render("error", {error: error}));
 });
 
 router.get('/byCloseness', function(req, res, next) {
     const uid = req.query.userid;
-    orderByCloseness(uid).then(data => {
+    orderByCloseness(uid, req.query.savedOnly).then(data => {
         res.json({recipes: data});
     }).catch(error => res.json({error: error}));
 })

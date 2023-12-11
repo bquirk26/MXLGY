@@ -4,7 +4,9 @@ const {pgp, db, getAllOwnedIngredients, getAllIngredients, ownIngredient, disown
 
 router.get('/get_all_ingredients', function(req, res, next) {
     const uid = req.query.userid;
-    getAllIngredients(uid).then((data) => {
+    const ownedOnly = req.query.ownedOnly;
+    console.log(ownedOnly);
+    getAllIngredients(uid, ownedOnly).then((data) => {
         res.json({ingredients: data})
     }).catch((error) => console.log(error));
 
@@ -14,13 +16,13 @@ router.get('/get_all_ingredients', function(req, res, next) {
 //mark owned
 router.post('/:ingredient/own', function(req, res, next) {
     const userid = req.query.userid;
-    ownIngredient(userid, req.params.ingredient).catch((error) => res.json({error: error}));
+    ownIngredient(userid, req.params.ingredient);
 });
 
 //unsave
 router.post('/:ingredient/disown', function(req, res, next) {
     const userid = req.query.userid;
-    disownIngredient(userid, req.params.ingredient).catch((error) => res.json({error: error}));
+    disownIngredient(userid, req.params.ingredient);
 });
 
 module.exports = router;
