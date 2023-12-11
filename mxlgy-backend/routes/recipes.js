@@ -52,27 +52,14 @@ router.get('/:recipe', function(req, res, next) {
 
 //mark saved
 router.post('/:recipe/save', function(req, res, next) {
-    const name = req.query.user;
-    db.any('SELECT email FROM users WHERE name = $1', [name]).then((data) => {
-        const email = data[0].email;
-        saveRecipe(email, req.params.recipe).then( () =>
-            res.redirect(`/api/recipes/get_all_recipes?user=${name}`)).catch((error) => {
-            res.render("error", {error: error});
-        });
-    }).catch(error => res.render("error", {error: error}));
+    const userid = req.query.userid;
+    saveRecipe(userid, req.params.recipe).catch((error) => res.json({error: error}));
 });
 
 //unsave
 router.post('/:recipe/unsave', function(req, res, next) {
-    const name = req.query.user;
-    db.any('SELECT email FROM users WHERE name = $1', [name]).then((data) => {
-        const email = data[0].email;
-        unsaveRecipe(email, req.params.recipe).then(() => {
-            res.redirect(`/api/recipes/get_all_recipes?user=${name}`)
-        }).catch((error) => {
-            res.render("error", {error: error});
-        })
-    }).catch(error => res.render("error", {error: error}));
+    const userid = req.query.userid;
+    unsaveRecipe(userid, req.params.recipe).catch((error) => res.json({error: error}));
 })
 
 module.exports = router;

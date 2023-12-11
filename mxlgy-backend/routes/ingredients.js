@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const {pgp, db, getAllOwnedIngredients, getAllIngredients, ownIngredient, disownIngredient} = require('../db');
+const {pgp, db, getAllOwnedIngredients, getAllIngredients, ownIngredient, disownIngredient, saveRecipe} = require('../db');
 
 router.get('/get_all_ingredients', function(req, res, next) {
     const uid = req.query.userid;
@@ -10,28 +10,17 @@ router.get('/get_all_ingredients', function(req, res, next) {
 
 });
 
+
 //mark owned
 router.post('/:ingredient/own', function(req, res, next) {
-    const name = req.query.user;
-    db.any('SELECT email FROM users WHERE name = $1', [name]).then((data) => {
-        const email = data[0].email;
-        ownIngredient(email, req.params.ingredient).then( () =>
-            res.redirect(`/api/ingredients/get_all_ingredients?user=${name}`)).catch((error) => {
-            res.render("error", {error: error});
-        });
-    }).catch(error => res.render("error", {error: error}));
+    const userid = req.query.userid;
+    ownIngredient(userid, req.params.ingredient).catch((error) => res.json({error: error}));
 });
 
 //unsave
 router.post('/:ingredient/disown', function(req, res, next) {
-    const name = req.query.user;
-    db.any('SELECT email FROM users WHERE name = $1', [name]).then((data) => {
-        const email = data[0].email;
-        disownIngredient(email, req.params.ingredient).then(() => {
-            res.redirect(`/api/ingredients/get_all_ingredients?user=${name}`)
-        }).catch((error) => {
-            res.render("error", {error: error});
-        })
-    }).catch(error => res.render("error", {error: error}))});
+    const userid = req.query.userid;
+    disownIngredient(userid, req.params.ingredient).catch((error) => res.json({error: error}));
+});
 
 module.exports = router;
