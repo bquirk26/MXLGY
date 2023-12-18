@@ -3,7 +3,7 @@ const data = require('./parsed_drinks.json');
 
 async function add_ingredients(ingredientNames) {
     ingredientNames.forEach(async (ingredientName) => {
-        await db.any('INSERT INTO ingredients (ingredientname, price) VALUES ($1, $2)', [ingredientName, 10]);
+        await db.any('INSERT INTO ingredients (ingredientname, price) VALUES ($1, $2)', [ingredientName, Math.round(Math.random() * 4 + 15)]);
     });
 }
 
